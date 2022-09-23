@@ -28,8 +28,20 @@ function plot_stuff2(tspan, x, y, th, N, label, save_plots, draw_line)
     end
     title(strcat(label, ' Evolutions'));
     legend(lab, 'location', 'ne', 'numcolumns', 2);
+    xlim([0 8]);
+    ylim([-1 8]);
+    
+    if save_plots
+        if ~isfolder('Figures')
+            mkdir('Figures');
+        end
+        saveas(gcf, strcat('Figures\', 'evolution_', label), 'png');
+        saveas(gcf, strcat('Figures\', 'evolution_', label), 'fig');
+        saveas(gcf, strcat('Figures\', 'evolution_', label), 'epsc');
+    end
     
     figure()
+    
     plot(tspan, th, 'linewidth', 2); grid; hold on;
     title(strcat(label, ' Evolutions of $\theta$'), 'interpreter', 'latex');
     legend(lab, 'location', 'se', 'numcolumns', 2);
@@ -38,8 +50,9 @@ function plot_stuff2(tspan, x, y, th, N, label, save_plots, draw_line)
         if ~isfolder('Figures')
             mkdir('Figures');
         end
-        saveas(gcf, strcat('Figures\', label), 'png');
-        saveas(gcf, strcat('Figures\', label), 'fig');
+        saveas(gcf, strcat('Figures\', 'theta_', label), 'png');
+        saveas(gcf, strcat('Figures\', 'theta_', label), 'fig');
+        saveas(gcf, strcat('Figures\', 'theta_', label), 'epsc');
     end
 end
 

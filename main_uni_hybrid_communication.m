@@ -9,10 +9,10 @@ starting_time = clock;
 
 % changable parameters
 T = 200;          % simulation time
-dt = 0.02;
+dt = 0.05;        % dt between instant of time
 tau_min = 0.1;    % lowerbound jump time interval
 tau_max = 0.5;    % upperbound jump time interval
-save_plots = 0;
+save_plots = 1;
 show_video = 0;
 
 % initial conditions
@@ -25,10 +25,6 @@ pvi = 2;
 pwi = pvi;
 dvi = 1;
 dwi = dvi;
-% pvi = 2;
-% pwi = pvi;
-% dvi = 1;
-% dwi = dvi;
 
 % position displacement
 delta_x = [2 1 -1 -2 -1 1]';
@@ -71,29 +67,22 @@ tspan = 0:dt:T;
 dim = length(tspan);
 ode_opt = odeset('MaxStep', 0.5);
 
-% indices corresponding to when a jump happens
-dim_j = fix(dim/1.5);
-tjump = sort(randi(dim, [dim_j 1]));
-
+% generate the vector of jumps: tjump s.t.
 % tau_min < tspan(tjump(i+1)) - tspan(tjump(i)) < tau_max
-b1 = fix(tau_min/dt)+1;
+b1 = fix(tau_min/dt);
 b2 = fix(tau_max/dt)-1;
-for i = 1:dim_j-1
-    
-    % delete an index if    tau_min > tspan(tjump(i+1)) - tspan(tjump(i))
-    if i < dim_j && tjump(i+1) - tjump(i) < b1
-        tjump(i+1) = [];
-        dim_j = dim_j - 1;
+tjump = 1;
+count = tjump;
+for i = 1:dim
+    % generate the new instant of jump
+    count = count + b1 + randi(b2 - b1);
+    if count > dim
+        break
     end
-    
-    % add new index if      tau_max < tspan(tjump(i+1)) - tspan(tjump(i))
-    if i < dim_j && tjump(i+1) - tjump(i) > b2
-        new_index = tjump(i) + b1 + randi(b2-b1);
-        tjump = [tjump(1:i); new_index; tjump(i+1:end)];
-        dim_j = dim_j+1;
-    end
-    
+    % add the new instant to the vectors of jumps
+    tjump = [tjump(1:i); count];
 end
+dim_j = length(tjump);
 
 %% Simulations
 
@@ -118,8 +107,8 @@ w_f = zeros(N, dim);    % flow states
 w_j = zeros(N, dim);    % jump states
 w_u = zeros(N, dim);    % union states
 
-uv_vec_u = zeros(N, dim);
-uw_vec_u = zeros(N, dim);
+% uv_vec_u = zeros(N, dim);
+% uw_vec_u = zeros(N, dim);
 
 % aply the intial conditions
 x_f(:, 1) = x0;
@@ -198,8 +187,9 @@ for k = 1:dim - 1
         u_j = [uv_j; uw_j];
         u_u = [uv_u; uw_u];
 
-        uv_vec_u(i,k+1) = uv_u;
-        uw_vec_u(i,k+1) = uw_u;
+%         % save the control
+%         uv_vec_u(i,k+1) = uv_u;
+%         uw_vec_u(i,k+1) = uw_u;
 
         % simulate the system
         [~, x_ode_f] = ode45(@(t, q) sys_uni(t, q, fn_f, g, u_f), [tspan(k) tspan(k+1)], [xi_f yi_f thi_f vi_f wi_f], ode_opt);
@@ -229,16 +219,16 @@ for k = 1:dim - 1
         w_u(i, k+1) = x_ode_u(idx, 5);
     
         % hybrid evolution
-%         if j(i) <= dim_j && k+1 == tjump(j(i))
-        if mod(k,3) == 0
+        if j(i) <= dim_j && k == tjump(j(i))
 
             % evaluate the error using x_u considering the jump graph
             [ez_u, et_u] = state_error(Aj, i, x_u(:, k), y_u(:, k), th_u(:, k), delta_x, delta_y);
             uv_u = -dvi*vi_u - pvi*phi_nu'*ez_u;
             uw_u = -dwi*wi_u - pwi*et_u + psi_f(tspan(k))*phip_nu'*ez_u;
 
-            uv_vec_u(i,k+1) = uv_u;
-            uw_vec_u(i,k+1) = uw_u;
+%             % save the control
+%             uv_vec_u(i,k+1) = uv_u;
+%             uw_vec_u(i,k+1) = uw_u;
             
             % discretize evolution of the unicycle
             x_u(i, k+1) = x_u(i, k) + dt*v_u(i, k)*cos(th_u(i, k));
@@ -266,16 +256,4 @@ plot_stuff2(tspan, x_u, y_u, th_u, N, 'Union', save_plots, 1)
 if show_video
     evolution_video
 end
-
-% figure()
-% hold on; grid on;
-% title("uv")
-% plot(tspan,uv_vec_u, 'linewidth', 2)
-% legend('1', '2', '3', '4', '5', '6')
-% 
-% figure()
-% hold on; grid on;
-% title('uw')
-% plot(tspan, uw_vec_u, 'linewidth', 2);
-% legend('1', '2', '3', '4', '5', '6')
 

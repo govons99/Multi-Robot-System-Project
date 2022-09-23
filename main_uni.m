@@ -28,10 +28,15 @@ A = [0 1 0 0 0 1;
     1 0 0 0 1 0];
 
 % parameters for the control
-pvi = 40;
+pvi = 18;
 pwi = 3;
-dvi = 10;
+dvi = 20;
 dwi = 20;
+
+pvi = 2;
+pwi = 2;
+dvi = 1;
+dwi = 1;
 
 % initial conditions
 x0 = [2 7 7 3 1 1]';
@@ -43,7 +48,9 @@ delta_x = [2 1 -1 -2 -1 1]';
 delta_y = [0 2 2 0 -2 -2]';
 
 % delta-persistent excitation
-psi = 2.5 + 4/pi*sin(2*t);
+%psi = 2.5 + 4/pi*sin(2*t);
+
+psi = 2.5 + 1/(4*pi)*sin(8*t);
 
 % vector fields
 phi = [cos(th) sin(th)]';
@@ -97,7 +104,7 @@ for k = 1:dim - 1
         for j = 1:N
             
             if A(i, j)
-
+                
                 zi = [xi - delta_x(i);
                     yi - delta_y(i)];
                 zj = [xk(j) - delta_x(j);
@@ -113,6 +120,9 @@ for k = 1:dim - 1
 
         uvi = -dvi*vi - pvi*phi_i'*ezi;
         uwi = -dwi*wi - pwi*ethi + psi_f(tspan(k))*phip_i'*ezi;
+        %uwi = -dwi*wi - pwi*ethi;
+        
+        phip_i'*ezi
 
         u = [uvi; uwi];
 
@@ -131,28 +141,30 @@ end
 
 %% Plots
 
-figure()
-for i = 1:N
-    plot(x_uni(i, :), y_uni(i, :), 'linewidth', 2); grid on; hold on;
-end
+plot_stuff2(tspan, x_uni, y_uni, th_uni, N, '', 0, 1)
 
-plot(x0, y0, '*', 'MarkerSize', 4);
-plot(x_uni(:, end), y_uni(:, end), 'ko', 'markerSize', 4);
-legend('Agent 1', 'Agent 2', 'Agent 3', 'Agent 4', 'Agent 5', 'Agent 6', 'location', 'ne');
-
-drawArrow = @(x,y,varargin) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0,varargin{:});
-
-for i = 1:N
-    
-    X = [x_uni(i,end) x_uni(i,end)+cos(th_uni(i,end))];
-    Y = [y_uni(i,end) y_uni(i,end)+sin(th_uni(i,end))];
-    drawArrow(X,Y,'linewidth',2)
-    
-end
-
-figure()
-plot(tspan, th_uni, 'linewidth', 2); grid; hold on;
-legend('Agent 1', 'Agent 2', 'Agent 3', 'Agent 4', 'Agent 5', 'Agent 6', 'location', 'se');
+% figure()
+% for i = 1:N
+%     plot(x_uni(i, :), y_uni(i, :), 'linewidth', 2); grid on; hold on;
+% end
+% 
+% plot(x0, y0, '*', 'MarkerSize', 4);
+% plot(x_uni(:, end), y_uni(:, end), 'ko', 'markerSize', 4);
+% legend('Agent 1', 'Agent 2', 'Agent 3', 'Agent 4', 'Agent 5', 'Agent 6', 'location', 'ne');
+% 
+% drawArrow = @(x,y,varargin) quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0,varargin{:});
+% 
+% for i = 1:N
+%     
+%     X = [x_uni(i,end) x_uni(i,end)+cos(th_uni(i,end))];
+%     Y = [y_uni(i,end) y_uni(i,end)+sin(th_uni(i,end))];
+%     drawArrow(X,Y,'linewidth',2)
+%     
+% end
+% 
+% figure()
+% plot(tspan, th_uni, 'linewidth', 2); grid; hold on;
+% legend('Agent 1', 'Agent 2', 'Agent 3', 'Agent 4', 'Agent 5', 'Agent 6', 'location', 'se');
 
 
 

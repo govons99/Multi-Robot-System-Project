@@ -14,8 +14,9 @@ function plot_stuff(t, x, N, label, save_plots)
         if ~isfolder('Figures')
             mkdir('Figures');
         end
-        saveas(gcf, strcat('Figures\', label), 'png');
-        saveas(gcf, strcat('Figures\', label), 'fig');
+        saveas(gcf, strcat('Figures/', label), 'png');
+        saveas(gcf, strcat('Figures/', label), 'fig');
+        saveas(gcf, strcat('Figures/', label), 'epsc');
     end
 end
 

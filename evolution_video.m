@@ -1,9 +1,14 @@
-vf = figure('name', 'VIDEO');
+vf = figure('name', 'EVOLUTION OF THE AGENTS');
+
+vv = VideoWriter('Figures\Evolution_of_Agents', 'MPEG-4');
+vv.FrameRate = 20;
+vv.Quality = 90;
+open(vv);
 
 tit = sgtitle(vf, sprintf('Time: %.2f s',tspan(1)));
 grid on; axis equal; hold on;
-xlim([-2 8])
-ylim([0 8])
+xlim([-1 8])
+ylim([-1 8])
 
 drawArrow = @(x,y,varargin) quiver(x(1),y(1),x(2)-x(1),y(2)-y(1),0,varargin{:});
 
@@ -13,7 +18,7 @@ colors = ['#0072BD'; '#D95319'; '#EDB120'; '#4DBEEE'; '#77AC30'; '#A2142F'];
 agent_size = 4;
 arrow_size = 3;
 arrow_length = 0.5;
-pixel_skipped = 20;
+pixel_skipped = 5;
 
 a1 = animatedline('Marker', 'o', 'Markersize', agent_size, 'MarkerEdgeColor', 'k', 'MarkerFaceColor', colors(1, :));
 a2 = animatedline('Marker', 'o', 'Markersize', agent_size, 'MarkerEdgeColor', 'k', 'MarkerFaceColor', colors(2, :));
@@ -25,9 +30,9 @@ a6 = animatedline('Marker', 'o', 'Markersize', agent_size, 'MarkerEdgeColor', 'k
 for i = 1:pixel_skipped:dim
 
     if i+pixel_skipped < dim
-        tit = sgtitle( sprintf('Time: %.2f s',tspan(i)));
+        tit = sgtitle(sprintf('Time: %.2f s',tspan(i)));
     else
-        tit = sgtitle( sprintf('Time: %.2f s',tspan(dim)));
+        tit = sgtitle(sprintf('Time: %.2f s',tspan(dim)));
     end
 
 
@@ -64,9 +69,19 @@ for i = 1:pixel_skipped:dim
     addpoints(a5, p5(1), p5(2))
     addpoints(a6, p6(1), p6(2))
 
+    FF = getframe(gcf);
+    writeVideo(vv,FF);
+
     pause(0.001);
 
     if i + pixel_skipped < dim
+
+        clearpoints(a1);
+        clearpoints(a2);
+        clearpoints(a3);
+        clearpoints(a4);
+        clearpoints(a5);
+        clearpoints(a6);
 
         delete(f1);
         delete(f2);
@@ -79,9 +94,20 @@ for i = 1:pixel_skipped:dim
 
 end
 
-        line(x_u(1:2, end), y_u(1:2, end), 'linewidth', 2, 'color', '#a8a8a8');
-        line(x_u(2:3, end), y_u(2:3, end), 'linewidth', 2, 'color', '#a8a8a8');
-        line(x_u(3:4, end), y_u(3:4, end), 'linewidth', 2, 'color', '#a8a8a8');
-        line(x_u(4:5, end), y_u(4:5, end), 'linewidth', 2, 'color', '#a8a8a8');
-        line(x_u(5:6, end), y_u(5:6, end), 'linewidth', 2, 'color', '#a8a8a8');
-        line([x_u(1, end) x_u(6, end)], [y_u(1, end) y_u(6, end)], 'linewidth', 2, 'color', '#a8a8a8');
+for i = 1:N
+    plot(x_u(i, :), y_u(i, :), 'linewidth', 2, 'color', colors(i, :));
+end
+
+line(x_u(1:2, end), y_u(1:2, end), 'linewidth', 2, 'color', '#a8a8a8');
+line(x_u(2:3, end), y_u(2:3, end), 'linewidth', 2, 'color', '#a8a8a8');
+line(x_u(3:4, end), y_u(3:4, end), 'linewidth', 2, 'color', '#a8a8a8');
+line(x_u(4:5, end), y_u(4:5, end), 'linewidth', 2, 'color', '#a8a8a8');
+line(x_u(5:6, end), y_u(5:6, end), 'linewidth', 2, 'color', '#a8a8a8');
+line([x_u(1, end) x_u(6, end)], [y_u(1, end) y_u(6, end)], 'linewidth', 2, 'color', '#a8a8a8');
+
+FF = getframe(gcf);
+for i = 1:vv.FrameRate
+    writeVideo(vv,FF);
+end
+
+close(vv);
